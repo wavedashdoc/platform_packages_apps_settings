@@ -54,8 +54,8 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements
     private static final String STATUS_BAR_CLOCK = "status_bar_show_clock";
     private static final String STATUS_BAR_CLOCK_SECONDS = "status_bar_clock_seconds";
 
-    private static final int STATUS_BAR_BATTERY_STYLE_TEXT = 1;
-    private static final int STATUS_BAR_BATTERY_STYLE_HIDDEN = 2;
+    private static final int STATUS_BAR_BATTERY_STYLE_TEXT = 3;
+    private static final int STATUS_BAR_BATTERY_STYLE_HIDDEN = 4;
 
     public static final int CLOCK_DATE_STYLE_LOWERCASE = 1;
     public static final int CLOCK_DATE_STYLE_UPPERCASE = 2;
