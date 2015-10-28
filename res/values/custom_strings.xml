@@ -19,11 +19,18 @@
     <string name="category_custom_summary">Custom features</string>
     <string name="custom_settings_title">Tweaks</string>
     <string name="power_menu_title">Power menu</string>
+    <string name="status_bar_settings_title">Status bar</string>
 
     <!-- Power menu -->
     <string name="power_menu_airplane_title">Airplane mode</string>
     <string name="power_menu_screenshot_title">Screenshot</string>
     <string name="power_menu_screenshot_summary">Long-press for partial screenshot</string>
     <string name="power_menu_settings_title">Settings shortcut</string>
+
+    <!-- Battery percentage -->
+    <string name="status_bar_battery_percentage_title">Battery percentage</string>
+    <string name="status_bar_battery_percentage_default">Hidden</string>
+    <string name="status_bar_battery_percentage_text_next">Next to the icon</string>
+    <string name="status_bar_battery_percentage_text_inside">Inside the icon</string>
 
 </resources>
