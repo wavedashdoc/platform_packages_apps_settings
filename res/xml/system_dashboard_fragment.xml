@@ -25,6 +25,12 @@
         android:order="-250"
         android:fragment="com.android.settings.gestures.GestureSettings" />
 
+    <PreferenceScreen
+        android:key="status_bar"
+        android:title="@string/status_bar_settings_title"
+        android:order="-245"
+        android:fragment="com.android.settings.custom.StatusBar" />
+
     <!-- Backup -->
     <Preference
         android:key="backup_settings"
