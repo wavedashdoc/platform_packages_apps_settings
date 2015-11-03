@@ -24,4 +24,7 @@
     <color name="theme_accent">#ff009688</color>
     <color name="action_picker_fab_background">@color/theme_accent</color>
 
+    <!-- Storage Summary Title -->
+    <color name="storage_summary_title_color">#ff607d8b</color>
+
 </resources>
