@@ -99,6 +99,12 @@
         <intent android:action="com.android.settings.action.DEMO_MODE" />
     </PreferenceScreen>
 
+    <PreferenceScreen
+        android:key="power_notification"
+        android:title="@string/tuner_full_importance_settings">
+        <intent android:action="com.android.settings.action.POWER_NOTIFICATION" />
+    </PreferenceScreen>
+
     <PreferenceCategory android:key="debug_debugging_category"
             android:title="@string/debug_debugging_category">
 
@@ -202,6 +208,11 @@
             android:key="pointer_location"
             android:title="@string/pointer_location"
             android:summary="@string/pointer_location_summary"/>
+
+        <com.android.settings.preference.SecureSettingSwitchPreference
+            android:key="overview_nav_bar_gesture"
+            android:title="@string/overview_nav_bar_gesture"
+            android:summary="@string/overview_nav_bar_gesture_desc" />
 
     </PreferenceCategory>
 

@@ -241,4 +241,17 @@
     <!-- Option to show brightness bar in quick settings -->
     <string name="show_brightness">Show brightness in Quick Settings</string>
 
+    <!-- Toggle to enable the gesture to enter split-screen by swiping up from the Overview button -->
+    <string name="overview_nav_bar_gesture">Enable split-screen swipe-up gesture</string>
+    <string name="overview_nav_bar_gesture_desc">Enable overview button swipe up gesture to enter split-screen</string>
+
+    <!-- Option to show full do not disturb panel in volume panel -->
+    <string name="tuner_full_zen_title">Show with volume controls</string>
+
+    <!-- Switch to control volume down behavior -->
+    <string name="volume_down_silent">Enter do not disturb on volume down</string>
+
+    <!-- Importance Tuner setting title -->
+    <string name="tuner_full_importance_settings">Power notification controls</string>
+
 </resources>
