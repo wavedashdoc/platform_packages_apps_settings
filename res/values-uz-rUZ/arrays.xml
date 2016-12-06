@@ -49,7 +49,7 @@
     <item msgid="6415509612413178727">"30 daqiqa"</item>
   </string-array>
   <string-array name="lock_after_timeout_entries">
-    <item msgid="8929270399652145290">"darhol"</item>
+    <item msgid="8929270399652145290">"Darhol"</item>
     <item msgid="6736512735606834431">"5 soniya"</item>
     <item msgid="8044619388267891375">"15 soniya"</item>
     <item msgid="1822002388249545488">"30 soniya"</item>
@@ -393,7 +393,7 @@
     <item msgid="9044232017390975191">"Juda katta"</item>
   </string-array>
   <string-array name="captioning_edge_type_selector_titles">
-    <item msgid="4733815704128258753">"Birlamchi"</item>
+    <item msgid="4733815704128258753">"Standart"</item>
     <item msgid="3217099060748617005">"Yo‘q"</item>
     <item msgid="7467615139904599420">"Chegara"</item>
     <item msgid="5623165557468608975">"Soyani olib tashlash"</item>
@@ -471,5 +471,10 @@
     <item msgid="3170497246594232819">"Binafsharang"</item>
     <item msgid="4608643045752965568">"Pushti"</item>
     <item msgid="6131821495505931173">"Qizil"</item>
+  </string-array>
+  <string-array name="automatic_storage_management_days">
+    <item msgid="687318592238852312">"30 kundan ko‘proq"</item>
+    <item msgid="2900554746706302178">"60 kundan ko‘proq"</item>
+    <item msgid="5692284879054004388">"90 kundan ko‘proq"</item>
   </string-array>
 </resources>

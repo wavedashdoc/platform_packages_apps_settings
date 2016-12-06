@@ -50,6 +50,7 @@ public class Settings extends SettingsActivity {
     public static class UserDictionarySettingsActivity extends SettingsActivity { /* empty */ }
     public static class HomeSettingsActivity extends SettingsActivity { /* empty */ }
     public static class DisplaySettingsActivity extends SettingsActivity { /* empty */ }
+    public static class NightDisplaySettingsActivity extends SettingsActivity { /* empty */ }
     public static class DeviceInfoSettingsActivity extends SettingsActivity { /* empty */ }
     public static class ApplicationSettingsActivity extends SettingsActivity { /* empty */ }
     public static class ManageApplicationsActivity extends SettingsActivity { /* empty */ }
@@ -77,6 +78,7 @@ public class Settings extends SettingsActivity {
     public static class UsageAccessSettingsActivity extends SettingsActivity { /* empty */ }
     public static class LocationSettingsActivity extends SettingsActivity { /* empty */ }
     public static class PrivacySettingsActivity extends SettingsActivity { /* empty */ }
+    public static class FactoryResetActivity extends SettingsActivity { /* empty */ }
     public static class RunningServicesActivity extends SettingsActivity { /* empty */ }
     public static class ManageAccountsSettingsActivity extends SettingsActivity { /* empty */ }
     public static class PowerUsageSummaryActivity extends SettingsActivity { /* empty */ }
@@ -84,6 +86,7 @@ public class Settings extends SettingsActivity {
     public static class AccountSyncSettingsActivity extends SettingsActivity { /* empty */ }
     public static class AccountSettingsActivity extends SettingsActivity { /* empty */ }
     public static class AccountSyncSettingsInAddAccountActivity extends SettingsActivity { /* empty */ }
+    public static class GestureSettingsActivity extends SettingsActivity { /* empty */ }
     public static class CryptKeeperSettingsActivity extends SettingsActivity { /* empty */ }
     public static class DeviceAdminSettingsActivity extends SettingsActivity { /* empty */ }
     public static class DataUsageSummaryActivity extends SettingsActivity { /* empty */ }
@@ -116,7 +119,8 @@ public class Settings extends SettingsActivity {
     public static class NotificationAppListActivity extends SettingsActivity { /* empty */ }
     public static class AppNotificationSettingsActivity extends SettingsActivity { /* empty */ }
     public static class OtherSoundSettingsActivity extends SettingsActivity { /* empty */ }
-    public static class DomainsURLsAppListActivity extends SettingsActivity { /* empty */ }
+    public static class ManageDomainUrlsActivity extends SettingsActivity { /* empty */ }
+    public static class AutomaticStorageManagerSettingsActivity extends SettingsActivity { /* empty */ }
 
     public static class TopLevelSettings extends SettingsActivity { /* empty */ }
     public static class ApnSettingsActivity extends SettingsActivity { /* empty */ }
@@ -131,7 +135,6 @@ public class Settings extends SettingsActivity {
 
     public static class WifiCallingSuggestionActivity extends SettingsActivity { /* empty */ }
     public static class ZenModeAutomationSuggestionActivity extends SettingsActivity { /* empty */ }
-    public static class WallpaperSuggestionActivity extends SettingsActivity { /* empty */ }
     public static class FingerprintSuggestionActivity extends FingerprintSettings { /* empty */ }
     public static class FingerprintEnrollSuggestionActivity extends FingerprintEnrollIntroduction {
         /* empty */
@@ -139,6 +142,17 @@ public class Settings extends SettingsActivity {
     public static class ScreenLockSuggestionActivity extends ChooseLockGeneric { /* empty */ }
     public static class WallpaperSettingsActivity extends SettingsActivity { /* empty */ }
     public static class ManagedProfileSettingsActivity extends SettingsActivity { /* empty */ }
+    public static class DeletionHelperActivity extends SettingsActivity { /* empty */ }
+
+    public static class ApnEditorActivity extends SettingsActivity { /* empty */ }
+    public static class ChooseAccountActivity extends SettingsActivity { /* empty */ }
+    public static class IccLockSettingsActivity extends SettingsActivity { /* empty */ }
+    public static class ImeiInformationActivity extends SettingsActivity { /* empty */ }
+    public static class SimStatusActivity extends SettingsActivity { /* empty */ }
+    public static class StatusActivity extends SettingsActivity { /* empty */ }
+    public static class TestingSettingsActivity extends SettingsActivity { /* empty */ }
+    public static class WifiAPITestActivity extends SettingsActivity { /* empty */ }
+    public static class WifiInfoActivity extends SettingsActivity { /* empty */ }
 
     // Categories.
     public static class WirelessSettings extends SettingsActivity { /* empty */ }

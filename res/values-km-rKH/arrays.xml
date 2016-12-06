@@ -187,7 +187,7 @@
   </string-array>
   <string-array name="wifi_proxy_settings">
     <item msgid="4473276491748503377">"គ្មាន"</item>
-    <item msgid="8673874894887358090">"ដោយ​បញ្ចូល"</item>
+    <item msgid="8673874894887358090">"ដោយ​ដៃ"</item>
     <item msgid="168893341855953140">"រចនាសម្ព័ន្ធប្រូកស៊ីស្វ័យប្រវត្តិ"</item>
   </string-array>
   <string-array name="apn_auth_entries">
@@ -471,5 +471,10 @@
     <item msgid="3170497246594232819">"ស្វាយ"</item>
     <item msgid="4608643045752965568">"ផ្កាឈូក"</item>
     <item msgid="6131821495505931173">"ពណ៌ក្រហម"</item>
+  </string-array>
+  <string-array name="automatic_storage_management_days">
+    <item msgid="687318592238852312">"លើសពី 30 ថ្ងៃ"</item>
+    <item msgid="2900554746706302178">"លើសពី 60 ថ្ងៃ"</item>
+    <item msgid="5692284879054004388">"លើសពី 90 ថ្ងៃ"</item>
   </string-array>
 </resources>

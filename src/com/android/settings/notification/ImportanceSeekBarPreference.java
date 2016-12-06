@@ -21,6 +21,7 @@ import com.android.settings.SeekBarPreference;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.service.notification.NotificationListenerService;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import com.android.settings.Utils;
 
 /**
  * A slider preference that controls notification importance.
@@ -45,6 +47,8 @@ public class ImportanceSeekBarPreference extends SeekBarPreference implements
     private SeekBar mSeekBar;
     private ColorStateList mActiveSliderTint;
     private ColorStateList mInactiveSliderTint;
+    private float mActiveSliderAlpha = 1.0f;
+    private float mInactiveSliderAlpha;
     private boolean mAutoOn;
     private Handler mHandler;
 
@@ -52,11 +56,15 @@ public class ImportanceSeekBarPreference extends SeekBarPreference implements
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setLayoutResource(R.layout.preference_importance_slider);
-        mActiveSliderTint = ColorStateList.valueOf(
-                context.getColor(R.color.importance_slider_color));
+        mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(context));
         mInactiveSliderTint = ColorStateList.valueOf(
                 context.getColor(R.color.importance_disabled_slider_color));
         mHandler = new Handler();
+        final TypedArray ta =
+                context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Theme, 0, 0);
+        mInactiveSliderAlpha =
+                ta.getFloat(com.android.internal.R.styleable.Theme_disabledAlpha, 0.5f);
+        ta.recycle();
     }
 
     public ImportanceSeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -124,13 +132,12 @@ public class ImportanceSeekBarPreference extends SeekBarPreference implements
     private void applyAutoUi(ImageView autoButton) {
         mSeekBar.setEnabled(!mAutoOn);
 
-        final ColorStateList sliderTint = mAutoOn ? mInactiveSliderTint : mActiveSliderTint;
+        final float alpha = mAutoOn ? mInactiveSliderAlpha : mActiveSliderAlpha;
         final ColorStateList starTint = mAutoOn ?  mActiveSliderTint : mInactiveSliderTint;
         Drawable icon = autoButton.getDrawable().mutate();
         icon.setTintList(starTint);
         autoButton.setImageDrawable(icon);
-        mSeekBar.setProgressTintList(sliderTint);
-        mSeekBar.setThumbTintList(sliderTint);
+        mSeekBar.setAlpha(alpha);
 
         if (mAutoOn) {
             setProgress(NotificationListenerService.Ranking.IMPORTANCE_DEFAULT);

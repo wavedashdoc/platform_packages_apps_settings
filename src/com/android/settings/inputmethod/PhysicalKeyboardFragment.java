@@ -30,6 +30,7 @@ import android.hardware.input.InputManager;
 import android.hardware.input.KeyboardLayout;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.support.v14.preference.SwitchPreference;
 import android.support.v7.preference.Preference;
@@ -60,7 +61,6 @@ import java.util.Objects;
 public final class PhysicalKeyboardFragment extends SettingsPreferenceFragment
         implements InputManager.InputDeviceListener {
 
-    private static final int USER_SYSTEM = 0;
     private static final String KEYBOARD_ASSISTANCE_CATEGORY = "keyboard_assistance_category";
     private static final String SHOW_VIRTUAL_KEYBOARD_SWITCH = "show_virtual_keyboard_switch";
     private static final String KEYBOARD_SHORTCUTS_HELPER = "keyboard_shortcuts_helper";
@@ -93,7 +93,7 @@ public final class PhysicalKeyboardFragment extends SettingsPreferenceFragment
                 getContentResolver(),
                 new HashMap<>(),
                 new ArrayList<>(),
-                USER_SYSTEM,
+                UserHandle.myUserId(),
                 false /* copyOnWrite */);
         mKeyboardAssistanceCategory = Preconditions.checkNotNull(
                 (PreferenceCategory) findPreference(KEYBOARD_ASSISTANCE_CATEGORY));
@@ -212,9 +212,9 @@ public final class PhysicalKeyboardFragment extends SettingsPreferenceFragment
             clearLoader();
             mLastHardKeyboards.clear();
             mLastHardKeyboards.addAll(newHardKeyboards);
+            mLoaderIDs.add(mNextLoaderId);
             getLoaderManager().initLoader(mNextLoaderId, null,
                     new Callbacks(getContext(), this, mLastHardKeyboards));
-            mLoaderIDs.add(mNextLoaderId);
             ++mNextLoaderId;
         }
     }
@@ -245,7 +245,7 @@ public final class PhysicalKeyboardFragment extends SettingsPreferenceFragment
                 Secure.getUriFor(Secure.SHOW_IME_WITH_HARD_KEYBOARD),
                 false,
                 mContentObserver,
-                USER_SYSTEM);
+                UserHandle.myUserId());
         updateShowVirtualKeyboardSwitch();
     }
 
@@ -266,7 +266,7 @@ public final class PhysicalKeyboardFragment extends SettingsPreferenceFragment
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     mSettings.setShowImeWithHardKeyboard((Boolean) newValue);
-                    return false;
+                    return true;
                 }
             };
 
@@ -496,8 +496,8 @@ public final class PhysicalKeyboardFragment extends SettingsPreferenceFragment
                 @NonNull Context context, @NonNull InputMethodInfo imi,
                 @Nullable InputMethodSubtype imSubtype) {
             if (imSubtype != null) {
-                return imSubtype.getDisplayName(
-                        context, imi.getPackageName(), imi.getServiceInfo().applicationInfo);
+                return InputMethodAndSubtypeUtil.getSubtypeLocaleNameAsSentence(
+                        imSubtype, context, imi);
             }
             return null;
         }

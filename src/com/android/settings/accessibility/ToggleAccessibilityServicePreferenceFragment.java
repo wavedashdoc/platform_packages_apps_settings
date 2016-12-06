@@ -30,9 +30,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -76,6 +80,21 @@ public class ToggleAccessibilityServicePreferenceFragment
     @Override
     protected int getMetricsCategory() {
         return MetricsEvent.ACCESSIBILITY_SERVICE;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater infalter) {
+        // Do not call super. We don't want to see the "Help & feedback" option on this page so as
+        // not to confuse users who think they might be able to send feedback about a specific
+        // accessibility service from this page.
+
+        // We still want to show the "Settings" menu.
+        if (mSettingsTitle != null && mSettingsIntent != null) {
+            MenuItem menuItem = menu.add(mSettingsTitle);
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            menuItem.setIntent(mSettingsIntent);
+        }
+
     }
 
     @Override
@@ -184,11 +203,19 @@ public class ToggleAccessibilityServicePreferenceFragment
     }
 
     private void updateSwitchBarToggleSwitch() {
-        final String settingValue = Settings.Secure.getString(getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        final boolean checked = settingValue != null
-                && settingValue.contains(mComponentName.flattenToString());
+        final boolean checked = AccessibilityUtils.getEnabledServicesFromSettings(getActivity())
+                .contains(mComponentName);
         mSwitchBar.setCheckedInternal(checked);
+    }
+
+    /**
+     * Return whether the device is encrypted with legacy full disk encryption. Newer devices
+     * should be using File Based Encryption.
+     *
+     * @return true if device is encrypted
+     */
+    private boolean isFullDiskEncrypted() {
+        return StorageManager.isNonDefaultBlockEncrypted();
     }
 
     private View createEnableDialogContentView(AccessibilityServiceInfo info) {
@@ -200,7 +227,7 @@ public class ToggleAccessibilityServicePreferenceFragment
 
         TextView encryptionWarningView = (TextView) content.findViewById(
                 R.id.encryption_warning);
-        if (LockPatternUtils.isDeviceEncrypted()) {
+        if (isFullDiskEncrypted()) {
             String text = getString(R.string.enable_service_encryption_warning,
                     info.getResolveInfo().loadLabel(getPackageManager()));
             encryptionWarningView.setText(text);
@@ -273,7 +300,7 @@ public class ToggleAccessibilityServicePreferenceFragment
                 // The user confirmed that they accept weaker encryption when
                 // enabling the accessibility service, so change encryption.
                 // Since we came here asynchronously, check encryption again.
-                if (LockPatternUtils.isDeviceEncrypted()) {
+                if (isFullDiskEncrypted()) {
                     mLockPatternUtils.clearEncryptionPassword();
                     Settings.Global.putInt(getContentResolver(),
                             Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, 0);
@@ -290,7 +317,7 @@ public class ToggleAccessibilityServicePreferenceFragment
         switch (which) {
             case DialogInterface.BUTTON_POSITIVE:
                 if (mShownDialogId == DIALOG_ID_ENABLE_WARNING) {
-                    if (LockPatternUtils.isDeviceEncrypted()) {
+                    if (isFullDiskEncrypted()) {
                         String title = createConfirmCredentialReasonMessage();
                         Intent intent = ConfirmDeviceCredentialActivity.createIntent(title, null);
                         startActivityForResult(intent,

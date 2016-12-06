@@ -49,7 +49,7 @@
     <item msgid="6415509612413178727">"30 minutos"</item>
   </string-array>
   <string-array name="lock_after_timeout_entries">
-    <item msgid="8929270399652145290">"Imediatamente"</item>
+    <item msgid="8929270399652145290">"De imediato"</item>
     <item msgid="6736512735606834431">"5 segundos"</item>
     <item msgid="8044619388267891375">"15 segundos"</item>
     <item msgid="1822002388249545488">"30 segundos"</item>
@@ -471,5 +471,10 @@
     <item msgid="3170497246594232819">"Roxo"</item>
     <item msgid="4608643045752965568">"Cor-de-rosa"</item>
     <item msgid="6131821495505931173">"Vermelho"</item>
+  </string-array>
+  <string-array name="automatic_storage_management_days">
+    <item msgid="687318592238852312">"Mais de 30 dias"</item>
+    <item msgid="2900554746706302178">"Mais de 60 dias"</item>
+    <item msgid="5692284879054004388">"Mais de 90 dias"</item>
   </string-array>
 </resources>

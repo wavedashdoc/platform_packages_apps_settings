@@ -273,6 +273,14 @@ public class TetherSettings extends RestrictedSettingsFragment
                     Log.d(TAG, "Restarting WifiAp due to prior config change.");
                     startTethering(TETHERING_WIFI);
                 }
+            } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
+                int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE, 0);
+                if (state == WifiManager.WIFI_AP_STATE_DISABLED
+                        && mRestartWifiApAfterConfigChange) {
+                    mRestartWifiApAfterConfigChange = false;
+                    Log.d(TAG, "Restarting WifiAp due to prior config change.");
+                    startTethering(TETHERING_WIFI);
+                }
             } else if (action.equals(Intent.ACTION_MEDIA_SHARED)) {
                 mMassStorageActive = true;
                 updateState();
@@ -324,6 +332,7 @@ public class TetherSettings extends RestrictedSettingsFragment
         mMassStorageActive = Environment.MEDIA_SHARED.equals(Environment.getExternalStorageState());
         mTetherChangeReceiver = new TetherChangeReceiver();
         IntentFilter filter = new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
+        filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         Intent intent = activity.registerReceiver(mTetherChangeReceiver, filter);
 
         filter = new IntentFilter();
@@ -500,6 +509,9 @@ public class TetherSettings extends RestrictedSettingsFragment
     private static boolean isIntentAvailable(Context context) {
         String[] provisionApp = context.getResources().getStringArray(
                 com.android.internal.R.array.config_mobile_hotspot_provision_app);
+        if (provisionApp.length < 2) {
+            return false;
+        }
         final PackageManager packageManager = context.getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClassName(provisionApp[0], provisionApp[1]);

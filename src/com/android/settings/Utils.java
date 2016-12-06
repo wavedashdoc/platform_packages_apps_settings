@@ -25,6 +25,7 @@ import android.app.AppGlobals;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.app.IActivityManager;
+import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -49,10 +50,9 @@ import android.net.LinkProperties;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -89,7 +89,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.TabWidget;
 import com.android.internal.app.UnlaunchableAppActivity;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.UserIcons;
+import com.android.internal.widget.LockPatternUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -513,7 +515,7 @@ public final class Utils extends com.android.settingslib.Utils {
         if (resultTo == null) {
             context.startActivity(intent);
         } else {
-            resultTo.startActivityForResult(intent, resultRequestCode);
+            resultTo.getActivity().startActivityForResult(intent, resultRequestCode);
         }
     }
 
@@ -759,9 +761,13 @@ public final class Utils extends com.android.settingslib.Utils {
      * devices allow users to flash other OSes to them.
      */
     static void setOemUnlockEnabled(Context context, boolean enabled) {
-        PersistentDataBlockManager manager =(PersistentDataBlockManager)
-                context.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
-        manager.setOemUnlockEnabled(enabled);
+        try {
+            PersistentDataBlockManager manager = (PersistentDataBlockManager)
+                    context.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+            manager.setOemUnlockEnabled(enabled);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Fail to set oem unlock.", e);
+        }
     }
 
     /**
@@ -1023,12 +1029,13 @@ public final class Utils extends com.android.settingslib.Utils {
      * @throws SecurityException if the given userId does not belong to the current user group.
      */
     public static int enforceSameOwner(Context context, int userId) {
-        UserManager um = getUserManager(context);
-        if (!um.getUserProfiles().contains(new UserHandle(userId))) {
-            throw new SecurityException("Given user id " + userId + " does not belong to user "
-                    + UserHandle.myUserId());
+        final UserManager um = getUserManager(context);
+        final int[] profileIds = um.getProfileIdsWithDisabled(UserHandle.myUserId());
+        if (ArrayUtils.contains(profileIds, userId)) {
+            return userId;
         }
-        return userId;
+        throw new SecurityException("Given user id " + userId + " does not belong to user "
+                + UserHandle.myUserId());
     }
 
     /**
@@ -1067,18 +1074,15 @@ public final class Utils extends com.android.settingslib.Utils {
     }
 
     public static List<String> getNonIndexable(int xml, Context context) {
-        HandlerThread thread = new HandlerThread("Index_" + xml);
-        thread.start();
+        if (Looper.myLooper() == null) {
+            // Hack to make sure Preferences can initialize.  Prefs expect a looper, but
+            // don't actually use it for the basic stuff here.
+            Looper.prepare();
+        }
         final List<String> ret = new ArrayList<>();
-        new Handler(thread.getLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                PreferenceManager manager = new PreferenceManager(context);
-                PreferenceScreen screen = manager.inflateFromResource(context, xml, null);
-                checkPrefs(screen, ret);
-            }
-        });
-        thread.quitSafely();
+        PreferenceManager manager = new PreferenceManager(context);
+        PreferenceScreen screen = manager.inflateFromResource(context, xml, null);
+        checkPrefs(screen, ret);
 
         return ret;
     }
@@ -1125,6 +1129,30 @@ public final class Utils extends com.android.settingslib.Utils {
         return false;
     }
 
+    public static boolean unlockWorkProfileIfNecessary(Context context, int userId) {
+        try {
+            if (!ActivityManagerNative.getDefault().isUserRunning(userId,
+                    ActivityManager.FLAG_AND_LOCKED)) {
+                return false;
+            }
+        } catch (RemoteException e) {
+            return false;
+        }
+        if (!(new LockPatternUtils(context)).isSecure(userId)) {
+            return false;
+        }
+        final KeyguardManager km = (KeyguardManager) context.getSystemService(
+                Context.KEYGUARD_SERVICE);
+        final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null, userId);
+        if (unlockIntent != null) {
+            context.startActivity(unlockIntent);
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
     public static CharSequence getApplicationLabel(Context context, String packageName) {
         try {
             final ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(
@@ -1146,5 +1174,14 @@ public final class Utils extends com.android.settingslib.Utils {
         }
         return false;
     }
-}
 
+    public static boolean isPackageDirectBootAware(Context context, String packageName) {
+        try {
+            final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
+                    packageName, 0);
+            return ai.isDirectBootAware() || ai.isPartiallyDirectBootAware();
+        } catch (NameNotFoundException ignored) {
+        }
+        return false;
+    }
+}

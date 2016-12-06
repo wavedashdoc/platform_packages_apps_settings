@@ -36,6 +36,8 @@ public class SyncStateSwitchPreference extends SwitchPreference {
     private boolean mFailed = false;
     private Account mAccount;
     private String mAuthority;
+    private String mPackageName;
+    private int mUid;
 
     /**
      * A mode for this preference where clicking does a one-time sync instead of
@@ -47,12 +49,22 @@ public class SyncStateSwitchPreference extends SwitchPreference {
         super(context, attrs, 0, R.style.SyncSwitchPreference);
         mAccount = null;
         mAuthority = null;
+        mPackageName = null;
+        mUid = 0;
     }
 
-    public SyncStateSwitchPreference(Context context, Account account, String authority) {
+    public SyncStateSwitchPreference(Context context, Account account, String authority,
+            String packageName, int uid) {
         super(context, null, 0, R.style.SyncSwitchPreference);
+        setup(account, authority, packageName, uid);
+    }
+
+    public void setup(Account account, String authority, String packageName, int uid) {
         mAccount = account;
         mAuthority = authority;
+        mPackageName = packageName;
+        mUid = uid;
+        notifyChanged();
     }
 
     @Override
@@ -147,4 +159,12 @@ public class SyncStateSwitchPreference extends SwitchPreference {
     public String getAuthority() {
         return mAuthority;
     }
+
+    public String getPackageName() {
+        return mPackageName;
+    };
+
+    public int getUid() {
+        return mUid;
+    };
 }

@@ -25,8 +25,9 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -59,6 +60,13 @@ public class RedactionInterstitial extends SettingsActivity {
         return RedactionInterstitialFragment.class.getName().equals(fragmentName);
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstance) {
+        super.onCreate(savedInstance);
+        LinearLayout layout = (LinearLayout) findViewById(R.id.content_parent);
+        layout.setFitsSystemWindows(false);
+    }
+
     /**
      * Create an intent for launching RedactionInterstitial.
      * @return An intent to launch the activity is if is available, @null if the activity is not
@@ -66,10 +74,6 @@ public class RedactionInterstitial extends SettingsActivity {
      */
     public static Intent createStartIntent(Context ctx, int userId) {
         return new Intent(ctx, RedactionInterstitial.class)
-                .putExtra(EXTRA_PREFS_SHOW_BUTTON_BAR, true)
-                .putExtra(EXTRA_PREFS_SET_BACK_TEXT, (String) null)
-                .putExtra(EXTRA_PREFS_SET_NEXT_TEXT, ctx.getString(
-                        R.string.app_notifications_dialog_done))
                 .putExtra(EXTRA_SHOW_FRAGMENT_TITLE_RESID,
                         Utils.isManagedProfile(UserManager.get(ctx), userId)
                             ? R.string.lock_screen_notifications_interstitial_title_profile
@@ -78,12 +82,11 @@ public class RedactionInterstitial extends SettingsActivity {
     }
 
     public static class RedactionInterstitialFragment extends SettingsPreferenceFragment
-            implements RadioGroup.OnCheckedChangeListener, CompoundButton.OnCheckedChangeListener {
+            implements RadioGroup.OnCheckedChangeListener, View.OnClickListener {
 
         private RadioGroup mRadioGroup;
         private RestrictedRadioButton mShowAllButton;
         private RestrictedRadioButton mRedactSensitiveButton;
-        private RestrictedCheckBox mRemoteInputCheckbox;
         private int mUserId;
 
         @Override
@@ -104,9 +107,6 @@ public class RedactionInterstitial extends SettingsActivity {
             mShowAllButton = (RestrictedRadioButton) view.findViewById(R.id.show_all);
             mRedactSensitiveButton =
                     (RestrictedRadioButton) view.findViewById(R.id.redact_sensitive);
-            mRemoteInputCheckbox =
-                    (RestrictedCheckBox) view.findViewById(R.id.lockscreen_remote_input);
-            mRemoteInputCheckbox.setOnCheckedChangeListener(this);
 
             mRadioGroup.setOnCheckedChangeListener(this);
             mUserId = Utils.getUserIdFromBundle(
@@ -120,6 +120,20 @@ public class RedactionInterstitial extends SettingsActivity {
                 ((RadioButton) view.findViewById(R.id.hide_all))
                     .setText(R.string.lock_screen_notifications_summary_disable_profile);
             }
+
+            final Button button = (Button) view.findViewById(R.id.redaction_done_button);
+            button.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.redaction_done_button) {
+                final RedactionInterstitial activity = (RedactionInterstitial) getActivity();
+                if (activity != null) {
+                    activity.setResult(RESULT_OK, activity.getResultIntentData());
+                    finish();
+                }
+            }
         }
 
         @Override
@@ -132,9 +146,6 @@ public class RedactionInterstitial extends SettingsActivity {
                     KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS);
             checkNotificationFeaturesAndSetDisabled(mRedactSensitiveButton,
                     KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
-            mRemoteInputCheckbox.setDisabledByAdmin(
-                    RestrictedLockUtils.checkIfKeyguardFeaturesDisabled(getActivity(),
-                            DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT, mUserId));
             loadFromSettings();
         }
 
@@ -161,12 +172,6 @@ public class RedactionInterstitial extends SettingsActivity {
             }
 
             mRadioGroup.check(checkedButtonId);
-
-            boolean allowRemoteInput = Settings.Secure.getIntForUser(getContentResolver(),
-                    Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, 0, mUserId) != 0;
-            mRemoteInputCheckbox.setChecked(!allowRemoteInput);
-
-            updateRemoteInputCheckboxVisibility();
         }
 
         @Override
@@ -179,23 +184,6 @@ public class RedactionInterstitial extends SettingsActivity {
             Settings.Secure.putIntForUser(getContentResolver(),
                     Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, enabled ? 1 : 0, mUserId);
 
-            updateRemoteInputCheckboxVisibility();
-        }
-
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean checked) {
-            if (buttonView == mRemoteInputCheckbox) {
-                Settings.Secure.putIntForUser(getContentResolver(),
-                        Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, checked ? 0 : 1, mUserId);
-            }
-        }
-
-        private void updateRemoteInputCheckboxVisibility() {
-            boolean visible = mRadioGroup.getCheckedRadioButtonId() == R.id.show_all;
-            boolean isManagedProfile = Utils.isManagedProfile(UserManager.get(getPrefContext()),
-                    mUserId);
-            mRemoteInputCheckbox
-                    .setVisibility((visible && !isManagedProfile) ? View.VISIBLE : View.INVISIBLE);
         }
     }
 }

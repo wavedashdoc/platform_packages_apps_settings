@@ -19,12 +19,11 @@
     android:id="@+id/dashboard_tile"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/selectable_card"
     android:gravity="center_vertical"
     android:minHeight="@dimen/dashboard_tile_minimum_height"
     android:clickable="true"
-    android:focusable="true"
-    android:background="@drawable/selectable_card"
-    android:elevation="@dimen/dashboard_category_elevation" >
+    android:focusable="true">
 
     <ImageView
         android:id="@android:id/icon"
@@ -51,7 +50,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Small"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:textColor="?android:attr/textColorSecondary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:paddingEnd="@dimen/dashboard_tile_image_margin_start" />
 
     </LinearLayout>
 

@@ -22,14 +22,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
+import android.os.PersistableBundle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
+
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settings.R;
 
 public class DndCondition extends Condition {
 
     private static final String TAG = "DndCondition";
+    private static final String KEY_STATE = "state";
 
     private int mZen;
     private ZenModeConfig mConfig;
@@ -50,6 +54,18 @@ public class DndCondition extends Condition {
             mConfig = null;
         }
         setActive(zenModeEnabled);
+    }
+
+    @Override
+    boolean saveState(PersistableBundle bundle) {
+        bundle.putInt(KEY_STATE, mZen);
+        return super.saveState(bundle);
+    }
+
+    @Override
+    void restoreState(PersistableBundle bundle) {
+        super.restoreState(bundle);
+        mZen = bundle.getInt(KEY_STATE, Global.ZEN_MODE_OFF);
     }
 
     @Override
@@ -123,9 +139,17 @@ public class DndCondition extends Condition {
         public void onReceive(Context context, Intent intent) {
             if (NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL
                     .equals(intent.getAction())) {
-                ConditionManager.get(context).getCondition(DndCondition.class)
-                        .refreshState();
+                final Condition condition =
+                        ConditionManager.get(context).getCondition(DndCondition.class);
+                if (condition != null) {
+                    condition.refreshState();
+                }
             }
         }
+    }
+
+    @Override
+    protected boolean shouldAlwaysListenToBroadcast() {
+        return true;
     }
 }

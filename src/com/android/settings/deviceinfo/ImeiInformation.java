@@ -21,16 +21,21 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
 
+import android.text.style.TtsSpan;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.PhoneFactory;
-import com.android.settings.InstrumentedPreferenceActivity;
 import com.android.settings.R;
+import com.android.settings.SettingsPreferenceFragment;
 
-public class ImeiInformation extends InstrumentedPreferenceActivity {
+public class ImeiInformation extends SettingsPreferenceFragment {
 
     private static final String KEY_PRL_VERSION = "prl_version";
     private static final String KEY_MIN_NUMBER = "min_number";
@@ -43,9 +48,9 @@ public class ImeiInformation extends InstrumentedPreferenceActivity {
     private boolean isMultiSIM = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSubscriptionManager = SubscriptionManager.from(this);
+        mSubscriptionManager = SubscriptionManager.from(getContext());
         final TelephonyManager telephonyManager =
             (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         initPreferenceScreen(telephonyManager.getSimCount());
@@ -75,21 +80,22 @@ public class ImeiInformation extends InstrumentedPreferenceActivity {
                 }
 
                 setSummaryText(KEY_PRL_VERSION, phone.getCdmaPrlVersion());
-                removePreferenceFromScreen(KEY_IMEI_SV);
 
                 if (phone.getLteOnCdmaMode() == PhoneConstants.LTE_ON_CDMA_TRUE) {
                     // Show ICC ID and IMEI for LTE device
                     setSummaryText(KEY_ICC_ID, phone.getIccSerialNumber());
-                    setSummaryText(KEY_IMEI, phone.getImei());
+                    setSummaryTextAsDigit(KEY_IMEI, phone.getImei());
+                    setSummaryTextAsDigit(KEY_IMEI_SV, phone.getDeviceSvn());
                 } else {
                     // device is not GSM/UMTS, do not display GSM/UMTS features
                     // check Null in case no specified preference in overlay xml
+                    removePreferenceFromScreen(KEY_IMEI_SV);
                     removePreferenceFromScreen(KEY_IMEI);
                     removePreferenceFromScreen(KEY_ICC_ID);
                 }
             } else {
-                setSummaryText(KEY_IMEI, phone.getImei());
-                setSummaryText(KEY_IMEI_SV, phone.getDeviceSvn());
+                setSummaryTextAsDigit(KEY_IMEI, phone.getImei());
+                setSummaryTextAsDigit(KEY_IMEI_SV, phone.getDeviceSvn());
                 // device is not CDMA, do not display CDMA features
                 // check Null in case no specified preference in overlay xml
                 removePreferenceFromScreen(KEY_PRL_VERSION);
@@ -128,10 +134,23 @@ public class ImeiInformation extends InstrumentedPreferenceActivity {
     }
 
     private void setSummaryText(String key, String text) {
+        setSummaryText(key, text, false /* forceDigit */);
+    }
+
+    private void setSummaryTextAsDigit(String key, String text) {
+        setSummaryText(key, text, true /* forceDigit */);
+    }
+
+    private void setSummaryText(String key, CharSequence text, boolean forceDigit) {
         final Preference preference = findPreference(key);
 
         if (TextUtils.isEmpty(text)) {
             text = getResources().getString(R.string.device_info_default);
+        } else if (forceDigit && TextUtils.isDigitsOnly(text)) {
+            final Spannable spannable = new SpannableStringBuilder(text);
+            final TtsSpan span = new TtsSpan.DigitsBuilder(text.toString()).build();
+            spannable.setSpan(span, 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            text = spannable;
         }
 
         if (preference != null) {

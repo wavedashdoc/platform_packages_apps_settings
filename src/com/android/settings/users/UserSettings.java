@@ -44,6 +44,7 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.Preference.OnPreferenceClickListener;
 import android.support.v7.preference.PreferenceGroup;
 import android.support.v7.preference.PreferenceScreen;
+import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -223,6 +224,7 @@ public class UserSettings extends SettingsPreferenceFragment
             mMePreference.setSummary(R.string.user_admin);
         }
         mAddUser = (DimmableIconPreference) findPreference(KEY_ADD_USER);
+        mAddUser.useAdminDisabledSummary(false);
         // Determine if add user/profile button should be visible
         if (mUserCaps.mCanAddUser && Utils.isDeviceProvisioned(getActivity())) {
             mAddUser.setOnPreferenceClickListener(this);
@@ -241,6 +243,11 @@ public class UserSettings extends SettingsPreferenceFragment
         loadProfile();
         updateUserList();
         mShouldUpdateUserList = false;
+
+        if (Global.getInt(getContext().getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
+            getActivity().finish();
+            return;
+        }
     }
 
     @Override
@@ -615,9 +622,9 @@ public class UserSettings extends SettingsPreferenceFragment
         }
     }
 
-    private boolean emergencyInfoActivityPresent() {
+    private static boolean emergencyInfoActivityPresent(Context context) {
         Intent intent = new Intent(ACTION_EDIT_EMERGENCY_INFO).setPackage("com.android.emergency");
-        List<ResolveInfo> infos = getContext().getPackageManager().queryIntentActivities(intent, 0);
+        List<ResolveInfo> infos = context.getPackageManager().queryIntentActivities(intent, 0);
         if (infos == null || infos.isEmpty()) {
             return false;
         }
@@ -743,13 +750,13 @@ public class UserSettings extends SettingsPreferenceFragment
                 pref = new UserPreference(getPrefContext(), null, user.id,
                         showSettings ? this : null,
                         showDelete ? this : null);
-                pref.setOnPreferenceClickListener(this);
                 pref.setKey("id=" + user.id);
                 userPreferences.add(pref);
                 if (user.isAdmin()) {
                     pref.setSummary(R.string.user_admin);
                 }
                 pref.setTitle(user.name);
+                pref.setSelectable(false);
             }
             if (pref == null) {
                 continue;
@@ -760,6 +767,8 @@ public class UserSettings extends SettingsPreferenceFragment
                 } else {
                     pref.setSummary(R.string.user_summary_not_set_up);
                 }
+                pref.setOnPreferenceClickListener(this);
+                pref.setSelectable(true);
             } else if (user.isRestricted()) {
                 pref.setSummary(R.string.user_summary_restricted_profile);
             }
@@ -800,6 +809,7 @@ public class UserSettings extends SettingsPreferenceFragment
             userPreferences.add(pref);
             pref.setDisabledByAdmin(
                     mUserCaps.mDisallowAddUser ? mUserCaps.mEnforcedAdmin : null);
+            pref.setSelectable(false);
         }
 
         // Sort list of users by serialNum
@@ -860,7 +870,7 @@ public class UserSettings extends SettingsPreferenceFragment
                     mUserCaps.mDisallowAddUser ? mUserCaps.mEnforcedAdmin : null);
         }
 
-        if (emergencyInfoActivityPresent()) {
+        if (emergencyInfoActivityPresent(getContext())) {
             mEmergencyInfoPreference.setOnPreferenceClickListener(this);
             mEmergencyInfoPreference.setOrder(Preference.DEFAULT_ORDER);
             preferenceScreen.addPreference(mEmergencyInfoPreference);
@@ -1142,6 +1152,12 @@ public class UserSettings extends SettingsPreferenceFragment
                                 R.string.user_add_user_or_profile_menu
                                 : R.string.user_add_user_menu);
                         data.screenTitle = res.getString(R.string.user_settings_title);
+                        result.add(data);
+                    }
+                    if (emergencyInfoActivityPresent(context)) {
+                        data = new SearchIndexableRaw(context);
+                        data.title = res.getString(R.string.emergency_info_title);
+                        data.screenTitle = res.getString(R.string.emergency_info_title);
                         result.add(data);
                     }
                     return result;

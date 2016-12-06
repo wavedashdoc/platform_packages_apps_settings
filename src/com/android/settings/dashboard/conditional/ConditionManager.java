@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.PersistableBundle;
 import android.util.Log;
 import android.util.Xml;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -54,10 +55,15 @@ public class ConditionManager {
 
     private final ArrayList<ConditionListener> mListeners = new ArrayList<>();
 
-    private ConditionManager(Context context) {
+    private ConditionManager(Context context, boolean loadConditionsNow) {
         mContext = context;
-        mConditions = new ArrayList<Condition>();
-        new ConditionLoader().execute();
+        mConditions = new ArrayList<>();
+        if (loadConditionsNow) {
+            ConditionLoader loader = new ConditionLoader();
+            loader.onPostExecute(loader.doInBackground());
+        } else {
+            new ConditionLoader().execute();
+        }
     }
 
     public void refreshAll() {
@@ -67,11 +73,11 @@ public class ConditionManager {
         }
     }
 
-    private void readFromXml() {
-        if (DEBUG) Log.d(TAG, "Reading from " + mXmlFile.toString());
+    private void readFromXml(File xmlFile, ArrayList<Condition> conditions) {
+        if (DEBUG) Log.d(TAG, "Reading from " + xmlFile.toString());
         try {
             XmlPullParser parser = Xml.newPullParser();
-            FileReader in = new FileReader(mXmlFile);
+            FileReader in = new FileReader(xmlFile);
             parser.setInput(in);
             int state = parser.getEventType();
 
@@ -86,7 +92,7 @@ public class ConditionManager {
                     PersistableBundle bundle = PersistableBundle.restoreFromXml(parser);
                     if (DEBUG) Log.d(TAG, "Reading " + clz + " -- " + bundle);
                     condition.restoreState(bundle);
-                    mConditions.add(condition);
+                    conditions.add(condition);
                     while (parser.getDepth() > depth) {
                         parser.next();
                     }
@@ -129,21 +135,22 @@ public class ConditionManager {
         }
     }
 
-    private void addMissingConditions() {
-        addIfMissing(AirplaneModeCondition.class);
-        addIfMissing(HotspotCondition.class);
-        addIfMissing(DndCondition.class);
-        addIfMissing(BatterySaverCondition.class);
-        addIfMissing(CellularDataCondition.class);
-        addIfMissing(BackgroundDataCondition.class);
-        addIfMissing(WorkModeCondition.class);
-        Collections.sort(mConditions, CONDITION_COMPARATOR);
+    private void addMissingConditions(ArrayList<Condition> conditions) {
+        addIfMissing(AirplaneModeCondition.class, conditions);
+        addIfMissing(HotspotCondition.class, conditions);
+        addIfMissing(DndCondition.class, conditions);
+        addIfMissing(BatterySaverCondition.class, conditions);
+        addIfMissing(CellularDataCondition.class, conditions);
+        addIfMissing(BackgroundDataCondition.class, conditions);
+        addIfMissing(WorkModeCondition.class, conditions);
+        addIfMissing(NightDisplayCondition.class, conditions);
+        Collections.sort(conditions, CONDITION_COMPARATOR);
     }
 
-    private void addIfMissing(Class<? extends Condition> clz) {
-        if (getCondition(clz) == null) {
+    private void addIfMissing(Class<? extends Condition> clz, ArrayList<Condition> conditions) {
+        if (getCondition(clz, conditions) == null) {
             if (DEBUG) Log.d(TAG, "Adding missing " + clz.getName());
-            mConditions.add(createCondition(clz));
+            conditions.add(createCondition(clz));
         }
     }
 
@@ -162,6 +169,8 @@ public class ConditionManager {
             return new BackgroundDataCondition(this);
         } else if (WorkModeCondition.class == clz) {
             return new WorkModeCondition(this);
+        } else if (NightDisplayCondition.class == clz) {
+            return new NightDisplayCondition(this);
         }
         throw new RuntimeException("Unexpected Condition " + clz);
     }
@@ -171,10 +180,14 @@ public class ConditionManager {
     }
 
     public <T extends Condition> T getCondition(Class<T> clz) {
-        final int N = mConditions.size();
+        return getCondition(clz, mConditions);
+    }
+
+    private <T extends Condition> T getCondition(Class<T> clz, List<Condition> conditions) {
+        final int N = conditions.size();
         for (int i = 0; i < N; i++) {
-            if (clz.equals(mConditions.get(i).getClass())) {
-                return (T) mConditions.get(i);
+            if (clz.equals(conditions.get(i).getClass())) {
+                return (T) conditions.get(i);
             }
         }
         return null;
@@ -213,29 +226,33 @@ public class ConditionManager {
         mListeners.remove(listener);
     }
 
-    private class ConditionLoader extends AsyncTask<Void, Void, Void> {
+    private class ConditionLoader extends AsyncTask<Void, Void, ArrayList<Condition>> {
         @Override
-        protected Void doInBackground(Void... params) {
+        protected ArrayList<Condition> doInBackground(Void... params) {
+            ArrayList<Condition> conditions = new ArrayList<>();
             mXmlFile = new File(mContext.getFilesDir(), FILE_NAME);
             if (mXmlFile.exists()) {
-                readFromXml();
+                readFromXml(mXmlFile, conditions);
             }
-            addMissingConditions();
-            return null;
+            addMissingConditions(conditions);
+            return conditions;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            final int N = mListeners.size();
-            for (int i = 0; i < N; i++) {
-                mListeners.get(i).onConditionsChanged();
-            }
+        protected void onPostExecute(ArrayList<Condition> conditions) {
+            mConditions.clear();
+            mConditions.addAll(conditions);
+            refreshAll();
         }
     }
 
     public static ConditionManager get(Context context) {
+        return get(context, true);
+    }
+
+    public static ConditionManager get(Context context, boolean loadConditionsNow) {
         if (sInstance == null) {
-            sInstance = new ConditionManager(context.getApplicationContext());
+            sInstance = new ConditionManager(context.getApplicationContext(), loadConditionsNow);
         }
         return sInstance;
     }
