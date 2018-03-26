@@ -44,11 +44,16 @@
         android:title="@string/smart_battery_manager_title"
         settings:controller="com.android.settings.fuelgauge.batterytip.BatteryManagerPreferenceController" />
 
+    <com.android.settings.preferences.SystemSettingSwitchPreference
+        android:key="battery_light_enabled"
+        android:title="@string/battery_light_enable"
+        android:defaultValue="false"
+        settings:allowDividerAbove="true" />
+
     <com.android.settings.fuelgauge.PowerGaugePreference
         android:key="last_full_charge"
         android:title="@string/battery_last_full_charge"
-        android:selectable="false"
-        settings:allowDividerAbove="true" />
+        android:selectable="false" />
 
     <com.android.settings.fuelgauge.PowerGaugePreference
         android:key="screen_usage"
