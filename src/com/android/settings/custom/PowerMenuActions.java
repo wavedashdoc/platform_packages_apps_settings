@@ -41,6 +41,7 @@ public class PowerMenuActions extends SettingsPreferenceFragment {
     private SwitchPreference mAirplanePref;
     private SwitchPreference mScreenshotPref;
     private SwitchPreference mSettingsPref;
+    private SwitchPreference mSilentPref;
 
     Context mContext;
     private ArrayList<String> mLocalUserConfig = new ArrayList<String>();
@@ -62,6 +63,8 @@ public class PowerMenuActions extends SettingsPreferenceFragment {
                 mScreenshotPref = (SwitchPreference) findPreference(GLOBAL_ACTION_KEY_SCREENSHOT);
             } else if (action.equals(GLOBAL_ACTION_KEY_SETTINGS)) {
                 mSettingsPref = (SwitchPreference) findPreference(GLOBAL_ACTION_KEY_SETTINGS);
+            } else if (action.equals(GLOBAL_ACTION_KEY_SILENT)) {
+                mSilentPref = (SwitchPreference) findPreference(GLOBAL_ACTION_KEY_SILENT);
             }
         }
 
@@ -88,6 +91,10 @@ public class PowerMenuActions extends SettingsPreferenceFragment {
         if (mSettingsPref != null) {
             mSettingsPref.setChecked(settingsArrayContains(GLOBAL_ACTION_KEY_SETTINGS));
         }
+
+        if (mSilentPref != null) {
+            mSilentPref.setChecked(settingsArrayContains(GLOBAL_ACTION_KEY_SILENT));
+        }
     }
 
     @Override
@@ -110,6 +117,10 @@ public class PowerMenuActions extends SettingsPreferenceFragment {
         } else if (preference == mSettingsPref) {
             value = mSettingsPref.isChecked();
             updateUserConfig(value, GLOBAL_ACTION_KEY_SETTINGS);
+
+        } else if (preference == mSilentPref) {
+            value = mSilentPref.isChecked();
+            updateUserConfig(value, GLOBAL_ACTION_KEY_SILENT);
 
         } else {
             return super.onPreferenceTreeClick(preference);
