@@ -18,6 +18,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/header_category_system">
 
+    <PreferenceScreen
+        android:key="custom_settings"
+        android:title="@string/category_custom_summary"
+        android:icon="@drawable/ic_advanced_settings"
+        android:order="-245"
+        android:fragment="com.android.settings.custom.CustomSettings" />
+
     <Preference
         android:key="gesture_settings"
         android:title="@string/gesture_preference_title"
