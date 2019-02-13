@@ -47,12 +47,6 @@
     <!-- AOSiP device maintainer name -->
     <string name="device_maintainer">Maintainer</string>
 
-    <!-- AOSiP Updater -->
-    <string name="update_settings_title">AOSiP Updater</string>
-    <string name="update_settings_summary">Check for the latest version of the rom</string>
-    <string name="update_package" translatable="false">org.lineageos.updater</string>
-    <string name="update_activity" translatable="false">org.lineageos.updater.UpdatesActivity</string>
-
     <!-- OwlsNest -->
     <string name="owlsnest_title">OwlsNest</string>
     <string name="owlsnest_activity_summary">Home Of the Kronic</string>
