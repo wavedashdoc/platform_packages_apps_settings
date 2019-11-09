@@ -259,6 +259,7 @@ public class AppNotificationSettings extends NotificationSettingsBase {
         final WindowManager.LayoutParams attrs = window.getAttributes();
         attrs.privateFlags &= ~PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         window.setAttributes(attrs);
+        }
     }
 
     private void addHeaderPref() {
