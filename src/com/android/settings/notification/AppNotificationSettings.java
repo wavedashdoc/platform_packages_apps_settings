@@ -156,6 +156,15 @@ public class AppNotificationSettings extends NotificationSettingsBase {
         updateDependents(mAppRow.banned);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        final Window window = getActivity().getWindow();
+        final WindowManager.LayoutParams attrs = window.getAttributes();
+        attrs.privateFlags &= ~PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+        window.setAttributes(attrs);
+    }
+
     private void setupLights() {
         //find light prefs
         mLights = (RestrictedSwitchPreference) findPreference(KEY_LIGHTS);
@@ -252,14 +261,6 @@ public class AppNotificationSettings extends NotificationSettingsBase {
             }
         });
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        final Window window = getActivity().getWindow();
-        final WindowManager.LayoutParams attrs = window.getAttributes();
-        attrs.privateFlags &= ~PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
-        window.setAttributes(attrs);
-        }
     }
 
     private void addHeaderPref() {
